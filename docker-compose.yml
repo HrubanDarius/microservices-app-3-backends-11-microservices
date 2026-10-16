@@ -1,0 +1,141 @@
+services:
+  # =====================================================================
+  # 1. REVERSE PROXY (Traefik v3.2) - Pagina 6 (Figura 5 din PDF)
+  # =====================================================================
+  reverse-proxy:
+    image: traefik:latest
+    container_name: reverse-proxy
+    restart: unless-stopped
+    command:
+      - --api.insecure=true
+      - --providers.docker
+      - --accesslog=true
+      - --accesslog.filepath=/var/log/traefik/access.log
+      - --log.level=DEBUG
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"       # Punctul unic de intrare pentru toata aplicatia
+      - "8082:8080"   # Traefik Dashboard (am pus 8082 spre Windows ca sa nu fie confuzii)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - traefik_logs:/var/log/traefik
+    networks:
+      - demo_net
+
+  # =====================================================================
+  # 2. BAZELE DE DATE (raman cu porturile expuse pt conexiunea ta din IntelliJ)
+  # =====================================================================
+  user-db:
+    image: mysql:8.4
+    container_name: user-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${USER_DB_NAME}
+      MYSQL_USER: ${USER_DB_USER}
+      MYSQL_PASSWORD: ${USER_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "${USER_DB_PORT}:3306"
+    volumes:
+      - user-mysql-data:/var/lib/mysql
+    networks:
+      - demo_net
+
+  device-db:
+    image: mysql:8.4
+    container_name: device-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DEVICE_DB_NAME}
+      MYSQL_USER: ${DEVICE_DB_USER}
+      MYSQL_PASSWORD: ${DEVICE_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "${DEVICE_DB_PORT}:3306"
+    volumes:
+      - device-mysql-data:/var/lib/mysql
+    networks:
+      - demo_net
+
+  # =====================================================================
+  # 3. USER SERVICE (cu Load Balancing - 2 replici)
+  # =====================================================================
+  user-service:
+    build:
+      context: ./user-microservice
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+    environment:
+      DB_HOST: user-db
+      DB_PORT: 3306
+      DB_NAME: ${USER_DB_NAME}
+      DB_USER: ${USER_DB_USER}
+      DB_PASSWORD: ${USER_DB_PASSWORD}
+      PORT: 8080
+    depends_on:
+      - user-db
+    networks:
+      - demo_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.user-service.rule=PathPrefix(`/user-service`)"
+      - "traefik.http.routers.user-service.entrypoints=web"
+      - "traefik.http.services.user-service.loadbalancer.server.port=8080"
+
+  # =====================================================================
+  # 4. DEVICE SERVICE (cu Load Balancing - 2 replici)
+  # =====================================================================
+  device-service:
+    build:
+      context: ./device-microservice
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+    environment:
+      DB_HOST: device-db
+      DB_PORT: 3306
+      DB_NAME: ${DEVICE_DB_NAME}
+      DB_USER: ${DEVICE_DB_USER}
+      DB_PASSWORD: ${DEVICE_DB_PASSWORD}
+      PORT: 8081
+    depends_on:
+      - device-db
+    networks:
+      - demo_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.device-service.rule=PathPrefix(`/device-service`)"
+      - "traefik.http.routers.device-service.entrypoints=web"
+      - "traefik.http.services.device-service.loadbalancer.server.port=8081"
+
+  # =====================================================================
+  # 5. FRONTEND (ruteaza radacina catre Nginx)
+  # =====================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      - user-service
+      - device-service
+    networks:
+      - demo_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+volumes:
+  user-mysql-data:
+  device-mysql-data:
+  traefik_logs:
+
+networks:
+  demo_net:
+    name: demo_net

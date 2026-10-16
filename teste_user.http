@@ -1,0 +1,42 @@
+### Base URL pentru user-microservice
+#@baseUrl = http://localhost:8080/user-service   cand n aveam reverse proxy
+
+### Base URL prin Traefik Reverse Proxy (Port 80)
+@baseUrl = http://localhost/user-service
+
+
+### 1. Inserare Utilizator Nou (POST /person)
+POST {{baseUrl}}/person
+Content-Type: application/json
+
+{
+  "name": "Popescu Ion",
+  "address": "Strada Memorandumului 28, Cluj-Napoca",
+  "age": 25
+}
+
+> {%
+    client.global.set("generatedUserId", response.body);
+%}
+
+### 2. Preluare Toti Utilizatorii (GET /person)
+GET {{baseUrl}}/person
+Accept: application/json
+
+### 3. Preluare Utilizator dupa ID (GET /person/{id})
+# Foloseste automat ID-ul generat la Pasul 1 daca rulati in IntelliJ
+GET {{baseUrl}}/person/{{generatedUserId}}
+Accept: application/json
+
+### 4. Actualizare Utilizator (PUT /person/{id})
+PUT {{baseUrl}}/person/{{generatedUserId}}
+Content-Type: application/json
+
+{
+  "name": "Popescu Ion Actualizat",
+  "address": "Strada Observatorului 34, Cluj-Napoca",
+  "age": 26
+}
+
+### 5. Stergere Utilizator dupa ID (DELETE /person/{id})
+DELETE {{baseUrl}}/person/{{generatedUserId}}

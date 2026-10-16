@@ -1,0 +1,49 @@
+### Base URL
+@baseUrl = http://localhost:8081/device-service
+@sampleUserId = d4e2a392-1b1f-4b6a-9391-7294fb8e9201
+
+### 1. Inserare Dispozitiv Nou (POST /device)
+POST {{baseUrl}}/device
+Content-Type: application/json
+
+{
+  "description": "Smart Meter - Panou Solar",
+  "address": "Strada Memorandumului 28, Cluj-Napoca",
+  "maxHourlyEnergyConsumption": 18.5
+}
+
+> {%
+    client.global.set("generatedDeviceId", response.body);
+%}
+
+### 2. Preluare Toate Dispozitivele (GET /device)
+GET {{baseUrl}}/device
+Accept: application/json
+
+### 3. Preluare Dispozitiv dupa ID (GET /device/{id})
+# Foloseste automat ID-ul generat la Pasul 1 daca rulati in IntelliJ, sau inlocuiti cu un UUID existent
+GET {{baseUrl}}/device/{{generatedDeviceId}}
+Accept: application/json
+
+### 4. Actualizare Dispozitiv si Mapare catre un Client (PUT /device/{id})
+# Actualizeaza campurile si asociaza dispozitivul la un userId (Client)
+PUT {{baseUrl}}/device/{{generatedDeviceId}}
+Content-Type: application/json
+
+{
+  "description": "Smart Meter - Panou Solar Modernizat",
+  "address": "Strada Memorandumului 28, Cluj-Napoca, Et. 2",
+  "maxHourlyEnergyConsumption": 25.0,
+  "userId": "{{sampleUserId}}"
+}
+
+### 5. Preluare Dispozitive Alocate unui Client (GET /device/user/{userId})
+GET {{baseUrl}}/device/user/{{sampleUserId}}
+Accept: application/json
+
+### 6. Stergere Dispozitiv dupa ID (DELETE /device/{id})
+DELETE {{baseUrl}}/device/{{generatedDeviceId}}
+
+### 7. Stergere Dispozitive dupa User ID (DELETE /device/user/{userId})
+# Folosit pentru sincronizarea stergerii utilizatorilor din user-service
+DELETE {{baseUrl}}/device/user/{{sampleUserId}}
