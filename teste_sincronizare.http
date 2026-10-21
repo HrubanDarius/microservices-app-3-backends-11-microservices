@@ -1,0 +1,92 @@
+### =========================================================================
+### TEST SINCRONIZARE SI STERGERE CASCADATA (ASSIGNMENT 1)
+### =========================================================================
+
+@userApi = http://localhost/user-service
+@deviceApi = http://localhost/device-service
+
+### -------------------------------------------------------------------------
+### PASUL 1: Inserare Utilizator Nou in user-service
+### user-service genereaza UUID-ul, apeleaza intern device-service (tabela user_account)
+### si abia apoi salveaza in user_db (tabela person).
+### -------------------------------------------------------------------------
+POST {{userApi}}/person
+Content-Type: application/json
+
+{
+  "name": "Ionescu Radu - Test Sync",
+  "address": "Strada Baritiu 26, Cluj-Napoca",
+  "age": 30
+}
+
+> {%
+    client.test("Status este 200 sau 201", function() {
+        client.assert(response.status === 200 || response.status === 201, "Status gresit la creare user");
+    });
+    // Salveaza automat UUID-ul utilizatorului creat
+    client.global.set("syncUserId", response.body);
+    client.log("User creat cu ID: " + response.body);
+%}
+
+### -------------------------------------------------------------------------
+### PASUL 2: Inserare Dispozitiv alocat utilizatorului proaspat creat
+### Trimitem 'userId' setat cu variabila {{syncUserId}} obtinuta la Pasul 1.
+### Foreign Key-ul din device_db valideaza existenta in user_account fara GET extern!
+### -------------------------------------------------------------------------
+POST {{deviceApi}}/device
+Content-Type: application/json
+
+{
+  "description": "Smart Meter - Test Cascada",
+  "address": "Strada Baritiu 26, Apartament 4",
+  "maxHourlyEnergyConsumption": 12.5,
+  "userId": "{{syncUserId}}"
+}
+
+> {%
+    client.test("Dispozitivul a fost salvat cu succes", function() {
+        client.assert(response.status === 200 || response.status === 201, "Dispozitivul nu a putut fi asociat");
+    });
+    // Salveaza automat UUID-ul dispozitivului creat
+    client.global.set("syncDeviceId", response.body);
+    client.log("Device creat si mapat cu ID: " + response.body);
+%}
+
+### -------------------------------------------------------------------------
+### PASUL 3: Preluare Dispozitive alocate acestui utilizator
+### Verifica daca dispozitivul apare mapat pe utilizatorul respectiv.
+### -------------------------------------------------------------------------
+GET {{deviceApi}}/device/user/{{syncUserId}}
+Accept: application/json
+
+### -------------------------------------------------------------------------
+### PASUL 4: TEST NEGATIV - Incercare de alocare catre un User inexistent
+### Trimitem un UUID inventat. Din cauza constrangerii de Foreign Key din
+### tabela locala user_account, cererea TREBUIE sa fie refuzata (Eroare 4xx / 5xx).
+### -------------------------------------------------------------------------
+POST {{deviceApi}}/device
+Content-Type: application/json
+
+{
+  "description": "Smart Meter Fantoma",
+  "address": "Adresa Necunoscuta",
+  "maxHourlyEnergyConsumption": 5.0,
+  "userId": "00000000-0000-0000-0000-000000000000"
+}
+
+### -------------------------------------------------------------------------
+### PASUL 5: TESTUL DE FOC - Stergerea Utilizatorului din user-service
+### 1. user-service trimite DELETE catre device-service/user/{{syncUserId}}
+### 2. device-service sterge randul din user_account
+### 3. ON DELETE CASCADE sterge automat dispozitivul creat la Pasul 2!
+### 4. user-service sterge utilizatorul din tabela sa person
+### -------------------------------------------------------------------------
+DELETE {{userApi}}/person/{{syncUserId}}
+
+### -------------------------------------------------------------------------
+### PASUL 6: Verificare Cascada - Dispozitivul a disparut automat?
+### Incercam sa citim dispozitivul creat la Pasul 2.
+### Daca raspunsul este 404 Not Found, stergerea cascadata a functionat impecabil!
+### -------------------------------------------------------------------------
+GET {{deviceApi}}/device/{{syncDeviceId}}
+Accept: application/json

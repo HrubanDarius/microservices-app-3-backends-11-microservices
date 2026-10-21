@@ -10,7 +10,9 @@ import ro.tuc.ds2020.dtos.DeviceDTO;
 import ro.tuc.ds2020.dtos.DeviceDetailsDTO;
 import ro.tuc.ds2020.dtos.builders.DeviceBuilder;
 import ro.tuc.ds2020.entities.Device;
+import ro.tuc.ds2020.entities.UserReference;
 import ro.tuc.ds2020.repositories.DeviceRepository;
+import ro.tuc.ds2020.repositories.UserReferenceRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +24,12 @@ public class DeviceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceService.class);
     private final DeviceRepository deviceRepository;
+    private final UserReferenceRepository userReferenceRepository;
 
     @Autowired
-    public DeviceService(DeviceRepository deviceRepository) {
+    public DeviceService(DeviceRepository deviceRepository, UserReferenceRepository userReferenceRepository) {
         this.deviceRepository = deviceRepository;
+        this.userReferenceRepository = userReferenceRepository;
     }
 
     public List<DeviceDTO> findDevices() {
@@ -37,7 +41,7 @@ public class DeviceService {
 
     public DeviceDetailsDTO findDeviceById(UUID id) {
         Optional<Device> deviceOptional = deviceRepository.findById(id);
-        if (!deviceOptional.isPresent()) {
+        if (deviceOptional.isEmpty()) {
             LOGGER.error("Device with id {} was not found in db", id);
             throw new ResourceNotFoundException(Device.class.getSimpleName() + " with id: " + id);
         }
@@ -45,7 +49,18 @@ public class DeviceService {
     }
 
     public UUID insert(DeviceDetailsDTO deviceDTO) {
+        UserReference userReference = null;
+        if (deviceDTO.getUserId() != null) {
+            Optional<UserReference> userReferenceOptional = userReferenceRepository.findById(deviceDTO.getUserId());
+            if (userReferenceOptional.isEmpty()) {
+                LOGGER.error("User with id {} was not found in user_account shadow table for device insertion", deviceDTO.getUserId());
+                throw new ResourceNotFoundException("User not found with id: " + deviceDTO.getUserId());
+            }
+            userReference = userReferenceOptional.get();
+        }
+
         Device device = DeviceBuilder.toEntity(deviceDTO);
+        device.setUser(userReference);
         device = deviceRepository.save(device);
         LOGGER.debug("Device with id {} was inserted in db", device.getId());
         return device.getId();
@@ -53,15 +68,27 @@ public class DeviceService {
 
     public DeviceDetailsDTO update(UUID id, DeviceDetailsDTO deviceDTO) {
         Optional<Device> deviceOptional = deviceRepository.findById(id);
-        if (!deviceOptional.isPresent()) {
+        if (deviceOptional.isEmpty()) {
             LOGGER.error("Device with id {} was not found in db for update", id);
             throw new ResourceNotFoundException(Device.class.getSimpleName() + " with id: " + id);
         }
+
+        UserReference userReference = null;
+        if (deviceDTO.getUserId() != null) {
+            Optional<UserReference> userReferenceOptional = userReferenceRepository.findById(deviceDTO.getUserId());
+            if (userReferenceOptional.isEmpty()) {
+                LOGGER.error("User with id {} was not found in user_account shadow table for device update", deviceDTO.getUserId());
+                throw new ResourceNotFoundException("User not found with id: " + deviceDTO.getUserId());
+            }
+            userReference = userReferenceOptional.get();
+        }
+
         Device device = deviceOptional.get();
         device.setDescription(deviceDTO.getDescription());
         device.setAddress(deviceDTO.getAddress());
         device.setMaxHourlyEnergyConsumption(deviceDTO.getMaxHourlyEnergyConsumption());
-        device.setUserId(deviceDTO.getUserId());
+        device.setUser(userReference);
+
         Device updatedDevice = deviceRepository.save(device);
         LOGGER.debug("Device with id {} was updated in db", updatedDevice.getId());
         return DeviceBuilder.toDeviceDetailsDTO(updatedDevice);
@@ -69,7 +96,7 @@ public class DeviceService {
 
     public void delete(UUID id) {
         Optional<Device> deviceOptional = deviceRepository.findById(id);
-        if (!deviceOptional.isPresent()) {
+        if (deviceOptional.isEmpty()) {
             LOGGER.error("Device with id {} was not found in db for deletion", id);
             throw new ResourceNotFoundException(Device.class.getSimpleName() + " with id: " + id);
         }

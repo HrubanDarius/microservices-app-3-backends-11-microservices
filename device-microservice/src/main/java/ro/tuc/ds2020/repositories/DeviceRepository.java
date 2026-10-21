@@ -12,10 +12,11 @@ import java.util.UUID;
 
 public interface DeviceRepository extends JpaRepository<Device, UUID> {
 
-    List<Device> findByUserId(UUID userId);
+    @Query("SELECT d FROM Device d WHERE d.user.id = :userId")
+    List<Device> findByUserId(@Param("userId") UUID userId);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM Device d WHERE d.userId = :userId")
+    @Query("DELETE FROM Device d WHERE d.user.id = :userId")
     void deleteByUserId(@Param("userId") UUID userId);
 }

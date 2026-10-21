@@ -2,10 +2,15 @@ package ro.tuc.ds2020.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -31,8 +36,10 @@ public class Device implements Serializable {
     @Column(name = "max_hourly_energy_consumption", nullable = false)
     private Double maxHourlyEnergyConsumption;
 
-    @Column(name = "user_id", columnDefinition = "BINARY(16)")
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private UserReference user;
 
     public Device() {
     }
@@ -47,7 +54,7 @@ public class Device implements Serializable {
         this.description = description;
         this.address = address;
         this.maxHourlyEnergyConsumption = maxHourlyEnergyConsumption;
-        this.userId = userId;
+        setUserId(userId);
     }
 
     public Device(UUID id, String description, String address, Double maxHourlyEnergyConsumption, UUID userId) {
@@ -55,7 +62,7 @@ public class Device implements Serializable {
         this.description = description;
         this.address = address;
         this.maxHourlyEnergyConsumption = maxHourlyEnergyConsumption;
-        this.userId = userId;
+        setUserId(userId);
     }
 
     public UUID getId() {
@@ -90,12 +97,24 @@ public class Device implements Serializable {
         this.maxHourlyEnergyConsumption = maxHourlyEnergyConsumption;
     }
 
+    public UserReference getUser() {
+        return user;
+    }
+
+    public void setUser(UserReference user) {
+        this.user = user;
+    }
+
     public UUID getUserId() {
-        return userId;
+        return user != null ? user.getId() : null;
     }
 
     public void setUserId(UUID userId) {
-        this.userId = userId;
+        if (userId != null) {
+            this.user = new UserReference(userId);
+        } else {
+            this.user = null;
+        }
     }
 
     @Override
@@ -111,11 +130,11 @@ public class Device implements Serializable {
                 && Objects.equals(description, device.description)
                 && Objects.equals(address, device.address)
                 && Objects.equals(maxHourlyEnergyConsumption, device.maxHourlyEnergyConsumption)
-                && Objects.equals(userId, device.userId);
+                && Objects.equals(getUserId(), device.getUserId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, description, address, maxHourlyEnergyConsumption, userId);
+        return Objects.hash(id, description, address, maxHourlyEnergyConsumption, getUserId());
     }
 }

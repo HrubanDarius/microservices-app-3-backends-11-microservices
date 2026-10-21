@@ -3,7 +3,7 @@
 
 ### Base URL prin Traefik Reverse Proxy (Port 80)
 @baseUrl = http://localhost/device-service
-@sampleUserId = d4e2a392-1b1f-4b6a-9391-7294fb8e9201
+@sampleUserId = 6d7f4949-8352-4a2b-9b09-cc9b594b7ca9
 
 ### 1. Inserare Dispozitiv Nou (POST /device)
 POST {{baseUrl}}/device
@@ -35,7 +35,7 @@ Content-Type: application/json
 
 {
   "description": "Smart Meter - Panou Solar Modernizat",
-  "address": "Strada Memorandumului 28, Cluj-Napoca, Et. 2",
+  "address": "Strada Memorandumului 28, Cluj-Napoca, deviceEt. 2",
   "maxHourlyEnergyConsumption": 25.0,
   "userId": "{{sampleUserId}}"
 }

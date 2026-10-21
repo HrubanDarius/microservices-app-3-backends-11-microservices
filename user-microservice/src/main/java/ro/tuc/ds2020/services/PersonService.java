@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ro.tuc.ds2020.controllers.handlers.exceptions.model.ResourceNotFoundException;
 import ro.tuc.ds2020.dtos.PersonDTO;
 import ro.tuc.ds2020.dtos.PersonDetailsDTO;
@@ -20,10 +21,12 @@ import java.util.stream.Collectors;
 public class PersonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonService.class);
     private final PersonRepository personRepository;
+    private final DeviceServiceClient deviceServiceClient;
 
     @Autowired
-    public PersonService(PersonRepository personRepository) {
+    public PersonService(PersonRepository personRepository, DeviceServiceClient deviceServiceClient) {
         this.personRepository = personRepository;
+        this.deviceServiceClient = deviceServiceClient;
     }
 
     public List<PersonDTO> findPersons() {
@@ -42,9 +45,18 @@ public class PersonService {
         return PersonBuilder.toPersonDTO(prosumerOptional.get());
     }
 
+    @Transactional
     public UUID insert(PersonDetailsDTO personDTO) {
+        UUID generatedId = personDTO.getId() != null ? personDTO.getId() : UUID.randomUUID();
+
+        LOGGER.info("Step 1: Syncing user creation to device-service with id: {}", generatedId);
+        deviceServiceClient.syncUserCreation(generatedId);
+
+        LOGGER.info("Step 3: Saving user to user-db with id: {}", generatedId);
         Person person = PersonBuilder.toEntity(personDTO);
+        person.setId(generatedId);
         person = personRepository.save(person);
+
         LOGGER.debug("Person with id {} was inserted in db", person.getId());
         return person.getId();
     }
@@ -64,12 +76,18 @@ public class PersonService {
         return PersonBuilder.toPersonDetailsDTO(updatedPerson);
     }
 
+    @Transactional
     public void delete(UUID id) {
         Optional<Person> personOptional = personRepository.findById(id);
         if (!personOptional.isPresent()) {
             LOGGER.error("Person with id {} was not found in db for deletion", id);
             throw new ResourceNotFoundException(Person.class.getSimpleName() + " with id: " + id);
         }
+
+        LOGGER.info("Step 1: Syncing user deletion to device-service for userId: {}", id);
+        deviceServiceClient.syncUserDeletion(id);
+
+        LOGGER.info("Step 2: Deleting user from user-db with id: {}", id);
         personRepository.delete(personOptional.get());
         LOGGER.debug("Person with id {} was deleted from db", id);
     }

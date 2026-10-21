@@ -10,9 +10,9 @@ POST {{baseUrl}}/person
 Content-Type: application/json
 
 {
-  "name": "Popescu Ion",
-  "address": "Strada Memorandumului 28, Cluj-Napoca",
-  "age": 25
+  "name": "Popescu Ion3",
+  "address": "Strada Memorandumului 28, Cluj-Napoca3",
+  "age": 69
 }
 
 > {%

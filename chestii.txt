@@ -1,0 +1,19 @@
+docker compose logs -f user-service     //vezi in timp real intr un terminal log urile pentru user-service sa testezi load balancing
+
+docker logs reverse-proxy
+
+reconstruire un container dupa modificari:
+
+docker compose up -d --build frontend
+
+
+
+DE FACUT:
+-sincronizare device cu user, cand adaugi sa se vada
+-cum faci in loc sa faci un get de fiecare data, mai adaugi in tabel o coloana ca e mai ieftin decat sa mai faci un get la fiecare asignare
+-tabel user id in db de la device fk intre tabela de la user id din db de Device si tabela de user id din db de User
+=> actualizare la stergere fara get . Actualizare ambele db de UserID(one to manny device la user)
+
+prima data bagi in device id ul de la userul adaugat nou acuma si dupa il bagi in user efectiv ca asa te asiguri
+ca nu poate ramane bagat id ul doar intr o tabela
+si la stergere .. creca la fel?

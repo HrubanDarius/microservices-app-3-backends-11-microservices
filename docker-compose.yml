@@ -1,6 +1,6 @@
 services:
   # =====================================================================
-  # 1. REVERSE PROXY (Traefik v3.2) - Pagina 6 (Figura 5 din PDF)
+  # 1. REVERSE PROXY (Traefik v3.2)
   # =====================================================================
   reverse-proxy:
     image: traefik:latest
@@ -23,7 +23,7 @@ services:
       - demo_net
 
   # =====================================================================
-  # 2. BAZELE DE DATE (raman cu porturile expuse pt conexiunea ta din IntelliJ)
+  # 2. BAZELE DE DATE (raman cu porturile expuse pt conexiunea din IntelliJ)
   # =====================================================================
   user-db:
     image: mysql:8.4
