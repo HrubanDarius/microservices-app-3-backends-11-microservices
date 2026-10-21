@@ -6,6 +6,7 @@ import java.util.UUID;
 public class PersonDTO {
     private UUID id;
     private String name;
+    private String address;
     private int age;
 
     public PersonDTO() {
@@ -14,6 +15,13 @@ public class PersonDTO {
     public PersonDTO(UUID id, String name, int age) {
         this.id = id;
         this.name = name;
+        this.age = age;
+    }
+
+    public PersonDTO(UUID id, String name, String address, int age) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
         this.age = age;
     }
 
@@ -31,6 +39,14 @@ public class PersonDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public int getAge() {

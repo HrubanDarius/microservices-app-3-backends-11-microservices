@@ -14,6 +14,9 @@ public class DeviceDTO {
     @JsonProperty("description")
     private String description;
 
+    @JsonProperty("address")
+    private String address;
+
     @JsonProperty("maxHourlyEnergyConsumption")
     private Double maxHourlyEnergyConsumption;
 
@@ -29,14 +32,23 @@ public class DeviceDTO {
         this.maxHourlyEnergyConsumption = maxHourlyEnergyConsumption;
     }
 
+    public DeviceDTO(UUID id, String description, Double maxHourlyEnergyConsumption, UUID userId) {
+        this.id = id;
+        this.description = description;
+        this.maxHourlyEnergyConsumption = maxHourlyEnergyConsumption;
+        this.userId = userId;
+    }
+
     @JsonCreator
     public DeviceDTO(
             @JsonProperty("id") UUID id,
             @JsonProperty("description") String description,
+            @JsonProperty("address") String address,
             @JsonProperty("maxHourlyEnergyConsumption") Double maxHourlyEnergyConsumption,
             @JsonProperty("userId") UUID userId) {
         this.id = id;
         this.description = description;
+        this.address = address;
         this.maxHourlyEnergyConsumption = maxHourlyEnergyConsumption;
         this.userId = userId;
     }
@@ -46,7 +58,6 @@ public class DeviceDTO {
         return id;
     }
 
-    @JsonProperty("id")
     public void setId(UUID id) {
         this.id = id;
     }
@@ -56,9 +67,17 @@ public class DeviceDTO {
         return description;
     }
 
-    @JsonProperty("description")
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @JsonProperty("address")
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @JsonProperty("maxHourlyEnergyConsumption")
@@ -66,7 +85,6 @@ public class DeviceDTO {
         return maxHourlyEnergyConsumption;
     }
 
-    @JsonProperty("maxHourlyEnergyConsumption")
     public void setMaxHourlyEnergyConsumption(Double maxHourlyEnergyConsumption) {
         this.maxHourlyEnergyConsumption = maxHourlyEnergyConsumption;
     }
@@ -76,7 +94,6 @@ public class DeviceDTO {
         return userId;
     }
 
-    @JsonProperty("userId")
     public void setUserId(UUID userId) {
         this.userId = userId;
     }
@@ -92,12 +109,13 @@ public class DeviceDTO {
         DeviceDTO deviceDTO = (DeviceDTO) o;
         return Objects.equals(id, deviceDTO.id)
                 && Objects.equals(description, deviceDTO.description)
+                && Objects.equals(address, deviceDTO.address)
                 && Objects.equals(maxHourlyEnergyConsumption, deviceDTO.maxHourlyEnergyConsumption)
                 && Objects.equals(userId, deviceDTO.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, description, maxHourlyEnergyConsumption, userId);
+        return Objects.hash(id, description, address, maxHourlyEnergyConsumption, userId);
     }
 }
