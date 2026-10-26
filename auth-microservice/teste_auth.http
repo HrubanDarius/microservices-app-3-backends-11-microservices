@@ -1,0 +1,114 @@
+### =====================================================================
+### TESTE ENDPOINTS AUTH MICROSERVICE
+### Baza de date: credential_db (auth-db)
+### Traefik Reverse Proxy ruleaza pe portul 80
+### =====================================================================
+
+@baseUrl = http://localhost/auth-service
+# Alternativa directa fara Traefik (cand microserviciul ruleaza local):
+# @baseUrl = http://localhost:8082/auth-service
+
+### ---------------------------------------------------------------------
+### 1. Test Login - Cont Administrator (admin / admin123)
+### Asteptat: HTTP 200 OK cu token JWT, id, username="admin", role="ADMIN"
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### ---------------------------------------------------------------------
+### 2. Test Login - Cont Client (client / client123)
+### Asteptat: HTTP 200 OK cu token JWT, id, username="client", role="CLIENT"
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "client",
+  "password": "client123"
+}
+
+### ---------------------------------------------------------------------
+### 3. Test Register - Creare cont nou de tip CLIENT
+### Asteptat: HTTP 201 Created cu token JWT si datele contului
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "andrei",
+  "password": "andrei",
+  "role": "CLIENT"
+}
+
+### ---------------------------------------------------------------------
+### 4. Test Login - Autentificare cu noul cont creat
+### Asteptat: HTTP 200 OK cu token JWT valid
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "andrei",
+  "password": "andrei"
+}
+
+### ---------------------------------------------------------------------
+### 5. Test Negativ - Login cu parola incorecta
+### Asteptat: HTTP 401 Unauthorized
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "parolaGresita123"
+}
+
+### ---------------------------------------------------------------------
+### 6. Test Negativ - Login cu utilizator inexistent
+### Asteptat: HTTP 401 Unauthorized
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "utilizator_inexistent_999",
+  "password": "oriceParola"
+}
+
+### ---------------------------------------------------------------------
+### 7. Test Negativ - Inregistrare cu username deja existent (duplicat)
+### Asteptat: HTTP 409 Conflict
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "parolaNoua123",
+  "role": "ADMIN"
+}
+
+### ---------------------------------------------------------------------
+### 8. Test Negativ - Body invalid (campuri vide)
+### Asteptat: HTTP 400 Bad Request
+### ---------------------------------------------------------------------
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": ""
+}
+
+### ---------------------------------------------------------------------
+### 9. Test Validare Token JWT (inlocuieste token-ul dupa un login reusit)
+### Asteptat: HTTP 200 OK cu payload decodat
+### ---------------------------------------------------------------------
+GET {{baseUrl}}/auth/validate
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhbmRyZWkiLCJ1c2VySWQiOiI5YTAxZjUwNC1kMzAwLTQ2YTAtOTgyMC02MzY1NzFlNWZkNDIiLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzkzMDE0Mjk4LCJleHAiOjE3OTMxMDA2OTh9.Y_L88td4vVZ5FPgEGkf-RXyb7IdV57POuXg4ld9AkF1mZMAwSEBWu5XxjaOUik4a

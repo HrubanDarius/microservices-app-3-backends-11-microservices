@@ -57,6 +57,23 @@ services:
     networks:
       - demo_net
 
+  auth-db:
+    image: mysql:8.4
+    container_name: auth-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${AUTH_DB_NAME}
+      MYSQL_USER: ${AUTH_DB_USER}
+      MYSQL_PASSWORD: ${AUTH_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "${AUTH_DB_PORT}:3306"
+    volumes:
+      - auth-mysql-data:/var/lib/mysql
+    networks:
+      - demo_net
+
+
   # =====================================================================
   # 3. USER SERVICE (cu Load Balancing - 2 replici)
   # =====================================================================
@@ -111,8 +128,36 @@ services:
       - "traefik.http.routers.device-service.entrypoints=web"
       - "traefik.http.services.device-service.loadbalancer.server.port=8081"
 
+
   # =====================================================================
-  # 5. FRONTEND (ruteaza radacina catre Nginx)
+  # 5. AUTHORIZATION SERVICE (cu Load Balancing - 2 replici)
+  # =====================================================================
+  auth-service:
+    build:
+      context: ./auth-microservice
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+    environment:
+      DB_HOST: auth-db
+      DB_PORT: 3306
+      DB_NAME: ${AUTH_DB_NAME}
+      DB_USER: ${AUTH_DB_USER}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      PORT: 8082
+    depends_on:
+      - auth-db
+    networks:
+      - demo_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth-service.rule=PathPrefix(`/auth-service`)"
+      - "traefik.http.routers.auth-service.entrypoints=web"
+      - "traefik.http.services.auth-service.loadbalancer.server.port=8082"
+
+  # =====================================================================
+  # 6. FRONTEND (ruteaza radacina catre Nginx)
   # =====================================================================
   frontend:
     build:
@@ -134,6 +179,7 @@ services:
 volumes:
   user-mysql-data:
   device-mysql-data:
+  auth-mysql-data:
   traefik_logs:
 
 networks:
