@@ -22,7 +22,7 @@ export default function UserTable({ users, onEdit, onDelete }) {
         <tbody>
           {users.map((user) => (
             <tr key={user.id} style={{ borderColor: '#1e293b' }}>
-              <td style={{ fontWeight: 600, color: '#f8fafc' }}>{user.name}</td>
+              <td style={{ fontWeight: 600, color: '#000000' }}>{user.name}</td>
               <td>{user.address || '—'}</td>
               <td>{user.age} ani</td>
               <td>

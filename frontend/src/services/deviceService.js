@@ -14,6 +14,11 @@ export async function getDevices() {
   return handleResponse(res);
 }
 
+export async function getDevicesByUserId(userId) {
+  const res = await fetch(`${BASE}/user/${userId}`);
+  return handleResponse(res);
+}
+
 export async function createDevice(data) {
   const res = await fetch(BASE, {
     method: 'POST',

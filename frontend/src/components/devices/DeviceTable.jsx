@@ -31,7 +31,7 @@ export default function DeviceTable({ devices, users, onEdit, onDelete }) {
             const userName = getUserName(device.userId);
             return (
               <tr key={device.id} style={{ borderColor: '#1e293b' }}>
-                <td style={{ fontWeight: 600, color: '#f8fafc' }}>{device.description}</td>
+                <td style={{ fontWeight: 600, color: '#000000' }}>{device.description}</td>
                 <td>{device.address || '—'}</td>
                 <td>
                   <span style={{ color: '#38bdf8', fontWeight: 600 }}>

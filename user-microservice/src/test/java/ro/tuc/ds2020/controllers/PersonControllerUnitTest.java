@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ro.tuc.ds2020.Ds2020TestConfig;
-import ro.tuc.ds2020.dtos.PersonDTO;
 import ro.tuc.ds2020.dtos.PersonDetailsDTO;
 import ro.tuc.ds2020.services.PersonService;
 import tools.jackson.databind.json.JsonMapper;
@@ -69,7 +68,8 @@ public class PersonControllerUnitTest extends Ds2020TestConfig {
     @Test
     public void getPersonByIdTest() throws Exception {
         UUID personId = UUID.randomUUID();
-        when(service.findPersonById(personId)).thenReturn(new PersonDTO(personId, "John", 22));
+        PersonDetailsDTO personDetailsDTO = new PersonDetailsDTO(personId, "John", "Somewhere Else street", 22);
+        when(service.findPersonById(personId)).thenReturn(personDetailsDTO);
 
         mockMvc.perform(get("/person/" + personId))
                 .andExpect(status().isOk());

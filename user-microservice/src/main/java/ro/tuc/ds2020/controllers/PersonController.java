@@ -45,8 +45,8 @@ public class PersonController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<PersonDTO> getPerson(@PathVariable("id") UUID personId) {
-        PersonDTO dto = personService.findPersonById(personId);
+    public ResponseEntity<PersonDetailsDTO> getPerson(@PathVariable("id") UUID personId) {
+        PersonDetailsDTO dto = personService.findPersonById(personId);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

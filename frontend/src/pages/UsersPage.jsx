@@ -2,6 +2,7 @@ import { useState } from 'react';
 import UserTable from '../components/users/UserTable';
 import UserModal from '../components/users/UserModal';
 import { createUser, updateUser, deleteUser } from '../services/userService';
+import { register } from '../services/authService';
 
 export default function UsersPage({ users, onUsersChange, onCascadeRefresh, onNotify }) {
   const [search, setSearch] = useState('');
@@ -14,17 +15,47 @@ export default function UsersPage({ users, onUsersChange, onCascadeRefresh, onNo
     [u.name, u.address, u.id].some((v) => (v || '').toLowerCase().includes(search.toLowerCase()))
   );
 
-  const openAdd = () => { setEditTarget(null); setModalMode('create'); setModalShow(true); };
-  const openEdit = (user) => { setEditTarget(user); setModalMode('edit'); setModalShow(true); };
+  const openAdd = () => {
+    setEditTarget(null);
+    setModalMode('create');
+    setModalShow(true);
+  };
+
+  const openEdit = (user) => {
+    setEditTarget(user);
+    setModalMode('edit');
+    setModalShow(true);
+  };
+
   const closeModal = () => setModalShow(false);
 
   const handleSubmit = async (formData) => {
     try {
       if (modalMode === 'create') {
-        await createUser(formData);
-        onNotify('success', 'Utilizatorul a fost adaugat cu succes!');
+        // 1. Creare profil in user-service (returneaza generatedUserId si declanseaza sincronizarea in device-service)
+        const generatedUserId = await createUser({
+          name: formData.name,
+          address: formData.address,
+          age: formData.age,
+        });
+
+        // 2. Creare cont de acces in auth-service cu acelasi ID
+        if (formData.username && formData.password) {
+          await register({
+            id: generatedUserId,
+            username: formData.username,
+            password: formData.password,
+            role: formData.role || 'CLIENT',
+          });
+        }
+
+        onNotify('success', 'Utilizatorul si contul de acces au fost create cu succes!');
       } else {
-        await updateUser(editTarget.id, formData);
+        await updateUser(editTarget.id, {
+          name: formData.name,
+          address: formData.address,
+          age: formData.age,
+        });
         onNotify('success', 'Utilizatorul a fost actualizat cu succes!');
       }
       closeModal();
@@ -74,7 +105,13 @@ export default function UsersPage({ users, onUsersChange, onCascadeRefresh, onNo
         <UserTable users={filtered} onEdit={openEdit} onDelete={openDelete} />
       </div>
 
-      <UserModal show={modalShow} mode={modalMode} initialData={editTarget} onSubmit={handleSubmit} onClose={closeModal} />
+      <UserModal
+        show={modalShow}
+        mode={modalMode}
+        initialData={editTarget}
+        onSubmit={handleSubmit}
+        onClose={closeModal}
+      />
 
       {deleteTarget && (
         <div className="modal-backdrop-custom" onClick={closeDelete}>

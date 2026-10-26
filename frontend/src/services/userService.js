@@ -15,6 +15,11 @@ export async function getUsers() {
   return handleResponse(res);
 }
 
+export async function getUserById(id) {
+  const res = await fetch(`${BASE}/${id}`);
+  return handleResponse(res);
+}
+
 export async function createUser(data) {
   const res = await fetch(BASE, {
     method: 'POST',

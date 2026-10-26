@@ -4,10 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -15,6 +13,7 @@ import java.util.UUID;
 /**
  * JPA entity that stores user authentication credentials.
  * Passwords are stored as BCrypt hashes, never in plain text.
+ * ID is manually assigned to match the UUID from user-microservice.
  */
 @Entity
 @Table(name = "user_credentials")
@@ -22,9 +21,7 @@ import java.util.UUID;
 public class UserCredential {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(columnDefinition = "BINARY(16)")
+    @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Column(nullable = false, unique = true)
@@ -42,13 +39,29 @@ public class UserCredential {
     }
 
     /**
-     * Full constructor for creating a new credential entity.
+     * Constructor without explicit ID.
      *
      * @param username the unique username
      * @param password the BCrypt-hashed password
      * @param role     the user's role
      */
     public UserCredential(final String username, final String password, final Role role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+    /**
+     * Full constructor for creating a credential entity with explicit ID.
+     *
+     * @param id       the explicit UUID matching user-microservice
+     * @param username the unique username
+     * @param password the BCrypt-hashed password
+     * @param role     the user's role
+     */
+    public UserCredential(final UUID id, final String username,
+                          final String password, final Role role) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;

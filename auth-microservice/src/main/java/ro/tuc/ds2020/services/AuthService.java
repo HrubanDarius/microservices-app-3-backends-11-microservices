@@ -48,6 +48,7 @@ public class AuthService {
 
     /**
      * Registers a new user account with hashed password and generates an initial JWT token.
+     * If an explicit UUID is provided in dto.getId(), it sets that ID to synchronize identity.
      *
      * @param dto the registration details
      * @return AuthResponseDTO containing JWT token and user info
@@ -60,8 +61,10 @@ public class AuthService {
             throw new DuplicateResourceException("Username '" + dto.getUsername() + "' is already taken!");
         }
 
+        final UUID credentialId = dto.getId() != null ? dto.getId() : UUID.randomUUID();
         final String hashedPassword = passwordEncoder.encode(dto.getPassword());
         final UserCredential credential = new UserCredential(
+                credentialId,
                 dto.getUsername(),
                 hashedPassword,
                 dto.getRole()

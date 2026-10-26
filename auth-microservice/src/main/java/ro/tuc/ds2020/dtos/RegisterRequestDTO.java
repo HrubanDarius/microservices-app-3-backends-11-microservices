@@ -4,10 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import ro.tuc.ds2020.entities.Role;
 
+import java.util.UUID;
+
 /**
  * DTO used to carry registration data from the client to the auth service.
+ * Supports an optional explicit UUID id to synchronize with user-microservice.
  */
 public class RegisterRequestDTO {
+
+    private UUID id;
 
     @NotBlank(message = "Username must not be blank")
     private String username;
@@ -23,7 +28,7 @@ public class RegisterRequestDTO {
     }
 
     /**
-     * Full constructor.
+     * Constructor without id.
      *
      * @param username the chosen username
      * @param password the plain-text password (will be hashed)
@@ -33,6 +38,40 @@ public class RegisterRequestDTO {
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    /**
+     * Full constructor including optional UUID id.
+     *
+     * @param id       the explicit user UUID (optional)
+     * @param username the chosen username
+     * @param password the plain-text password
+     * @param role     the assigned role
+     */
+    public RegisterRequestDTO(final UUID id, final String username,
+                              final String password, final Role role) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+    /**
+     * Returns the optional explicit UUID.
+     *
+     * @return user UUID or null
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * Sets the explicit UUID.
+     *
+     * @param id the UUID to set
+     */
+    public void setId(final UUID id) {
+        this.id = id;
     }
 
     /**
