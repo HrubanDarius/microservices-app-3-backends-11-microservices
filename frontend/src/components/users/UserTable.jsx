@@ -2,7 +2,7 @@ export default function UserTable({ users, onEdit, onDelete }) {
   if (users.length === 0) {
     return (
       <p className="text-center py-5" style={{ color: '#94a3b8' }}>
-        Nu a fost găsit niciun utilizator.
+        Nu a fost gasit niciun utilizator.
       </p>
     );
   }
@@ -13,10 +13,10 @@ export default function UserTable({ users, onEdit, onDelete }) {
         <thead style={{ backgroundColor: '#0f172a', color: '#94a3b8', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           <tr>
             <th>Nume</th>
-            <th>Adresă</th>
-            <th>Vârstă</th>
+            <th>Adresa</th>
+            <th>Varsta</th>
             <th>ID Utilizator (UUID)</th>
-            <th className="text-end">Acțiuni</th>
+            <th className="text-end">Actiuni</th>
           </tr>
         </thead>
         <tbody>
@@ -31,10 +31,10 @@ export default function UserTable({ users, onEdit, onDelete }) {
               <td>
                 <div className="action-buttons">
                   <button className="btn btn-sm btn-outline-primary" onClick={() => onEdit(user)}>
-                    ✏️ Editează
+                    ✏️ Editeaza
                   </button>
                   <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(user)}>
-                    🗑️ Șterge
+                    🗑️ Sterge
                   </button>
                 </div>
               </td>

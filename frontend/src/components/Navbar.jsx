@@ -1,6 +1,6 @@
 export default function Navbar({ activePage, onNavigate, onRefresh }) {
   const navItems = [
-    { key: 'home',    label: '📊 Acasă' },
+    { key: 'home',    label: '📊 Acasa' },
     { key: 'users',   label: '👥 Utilizatori' },
     { key: 'devices', label: '📟 Dispozitive' },
   ];
@@ -40,7 +40,7 @@ export default function Navbar({ activePage, onNavigate, onRefresh }) {
             >
               Online • 8 Containere
             </span>
-            <button className="btn btn-sm btn-outline-secondary" onClick={onRefresh} title="Reîmprospătează datele">
+            <button className="btn btn-sm btn-outline-secondary" onClick={onRefresh} title="Reimprospateaza datele">
               🔄 Refresh
             </button>
           </div>

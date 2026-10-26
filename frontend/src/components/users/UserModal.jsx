@@ -18,12 +18,12 @@ export default function UserModal({ show, mode, initialData, onSubmit, onClose }
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.address.trim() || !form.age) {
-      setError('Toate câmpurile sunt obligatorii.');
+      setError('Toate campurile sunt obligatorii.');
       return;
     }
     const ageNum = parseInt(form.age, 10);
     if (isNaN(ageNum) || ageNum < 18) {
-      setError('Vârsta trebuie să fie de minim 18 ani.');
+      setError('Varsta trebuie sa fie de minim 18 ani.');
       return;
     }
     onSubmit({ name: form.name.trim(), address: form.address.trim(), age: ageNum });
@@ -34,14 +34,14 @@ export default function UserModal({ show, mode, initialData, onSubmit, onClose }
   return (
     <div className="modal-backdrop-custom" onClick={onClose}>
       <div
-        className="modal-dialog-custom shadow-lg"
+        className="shadow-lg"
         style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '14px', width: '100%', maxWidth: '520px', padding: 0, overflow: 'hidden' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center px-4 py-3" style={{ borderBottom: '1px solid #334155' }}>
           <h5 className="m-0 fw-semibold" style={{ color: '#ffffff' }}>
-            {mode === 'create' ? '➕ Adaugă Utilizator Nou' : '✏️ Editează Utilizator'}
+            {mode === 'create' ? '➕ Adauga Utilizator Nou' : '✏️ Editeaza Utilizator'}
           </h5>
           <button type="button" className="btn-close btn-close-white" onClick={onClose} />
         </div>
@@ -57,22 +57,22 @@ export default function UserModal({ show, mode, initialData, onSubmit, onClose }
             </div>
 
             <div className="mb-3">
-              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Adresă de Domiciliu *</label>
+              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Adresa de Domiciliu *</label>
               <input type="text" className="form-control form-control-dark" placeholder="ex: Str. Memorandumului 28, Cluj-Napoca" value={form.address} onChange={set('address')} required />
             </div>
 
             <div className="mb-3">
-              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Vârstă (ani) *</label>
+              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Varsta (ani) *</label>
               <input type="number" min="18" max="120" className="form-control form-control-dark" placeholder="Minim 18 ani" value={form.age} onChange={set('age')} required />
-              <div className="form-text" style={{ color: '#64748b' }}>Regulă backend: vârsta minimă permisă este de 18 ani.</div>
+              <div className="form-text" style={{ color: '#64748b' }}>Regula backend: varsta minima permisa este de 18 ani.</div>
             </div>
           </div>
 
           {/* Footer */}
           <div className="d-flex justify-content-end gap-2 px-4 py-3" style={{ background: '#0f172a', borderTop: '1px solid #334155' }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Anulează</button>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>Anuleaza</button>
             <button type="submit" className="btn btn-primary">
-              {mode === 'create' ? 'Creează Utilizator' : 'Salvează Modificările'}
+              {mode === 'create' ? 'Creeaza Utilizator' : 'Salveaza Modificarile'}
             </button>
           </div>
         </form>

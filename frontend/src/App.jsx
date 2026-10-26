@@ -37,14 +37,12 @@ function App() {
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
-  // Cascade refresh (user deleted → refresh both)
   const cascadeRefresh = () => Promise.all([fetchUsers(), fetchDevices()]);
 
   return (
     <>
       <Navbar activePage={activePage} onNavigate={setActivePage} onRefresh={loadAll} />
 
-      {/* Global notification banner */}
       {notification && (
         <div
           className={`alert alert-${notification.type === 'success' ? 'success' : 'danger'} d-flex justify-content-between align-items-center mx-4 mt-3`}
@@ -58,7 +56,7 @@ function App() {
       {loading ? (
         <div className="d-flex flex-column align-items-center justify-content-center py-5" style={{ color: '#94a3b8' }}>
           <div className="loading-spinner mb-3" />
-          <p>Se încarcă datele din microservicii...</p>
+          <p>Se incarca datele din microservicii...</p>
         </div>
       ) : (
         <>

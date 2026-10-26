@@ -8,7 +8,7 @@ export default function DeviceTable({ devices, users, onEdit, onDelete }) {
   if (devices.length === 0) {
     return (
       <p className="text-center py-5" style={{ color: '#94a3b8' }}>
-        Nu a fost găsit niciun dispozitiv energetic.
+        Nu a fost gasit niciun dispozitiv energetic.
       </p>
     );
   }
@@ -19,11 +19,11 @@ export default function DeviceTable({ devices, users, onEdit, onDelete }) {
         <thead style={{ backgroundColor: '#0f172a', color: '#94a3b8', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           <tr>
             <th>Descriere</th>
-            <th>Adresă Instalare</th>
+            <th>Adresa Instalare</th>
             <th>Consum Maxim (kWh)</th>
             <th>Utilizator Asociat</th>
             <th>ID Dispozitiv (UUID)</th>
-            <th className="text-end">Acțiuni</th>
+            <th className="text-end">Actiuni</th>
           </tr>
         </thead>
         <tbody>
@@ -53,10 +53,10 @@ export default function DeviceTable({ devices, users, onEdit, onDelete }) {
                 <td>
                   <div className="action-buttons">
                     <button className="btn btn-sm btn-outline-primary" onClick={() => onEdit(device)}>
-                      ✏️ Editează
+                      ✏️ Editeaza
                     </button>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(device)}>
-                      🗑️ Șterge
+                      🗑️ Sterge
                     </button>
                   </div>
                 </td>

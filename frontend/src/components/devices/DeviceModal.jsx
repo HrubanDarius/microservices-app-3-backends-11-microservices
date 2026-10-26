@@ -27,12 +27,12 @@ export default function DeviceModal({ show, mode, initialData, users, onSubmit, 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.description.trim() || !form.address.trim() || !form.maxHourlyEnergyConsumption) {
-      setError('Descrierea, adresa și consumul maxim sunt obligatorii.');
+      setError('Descrierea, adresa si consumul maxim sunt obligatorii.');
       return;
     }
     const consumptionNum = parseFloat(form.maxHourlyEnergyConsumption);
     if (isNaN(consumptionNum) || consumptionNum <= 0) {
-      setError('Consumul maxim orar trebuie să fie pozitiv (> 0).');
+      setError('Consumul maxim orar trebuie sa fie pozitiv (> 0).');
       return;
     }
     onSubmit({
@@ -55,7 +55,7 @@ export default function DeviceModal({ show, mode, initialData, users, onSubmit, 
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center px-4 py-3" style={{ borderBottom: '1px solid #334155' }}>
           <h5 className="m-0 fw-semibold" style={{ color: '#ffffff' }}>
-            {mode === 'create' ? '➕ Adaugă Dispozitiv Nou' : '✏️ Editează Dispozitiv'}
+            {mode === 'create' ? '➕ Adauga Dispozitiv Nou' : '✏️ Editeaza Dispozitiv'}
           </h5>
           <button type="button" className="btn-close btn-close-white" onClick={onClose} />
         </div>
@@ -67,18 +67,18 @@ export default function DeviceModal({ show, mode, initialData, users, onSubmit, 
 
             <div className="mb-3">
               <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Descriere Dispozitiv *</label>
-              <input type="text" className="form-control form-control-dark" placeholder="ex: Smart Meter - Panou Solar Bucătărie" value={form.description} onChange={set('description')} required />
+              <input type="text" className="form-control form-control-dark" placeholder="ex: Smart Meter - Panou Solar Bucatarie" value={form.description} onChange={set('description')} required />
             </div>
 
             <div className="mb-3">
-              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Adresă Instalare *</label>
+              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Adresa Instalare *</label>
               <input type="text" className="form-control form-control-dark" placeholder="ex: Str. Observatorului 34, Ap. 12" value={form.address} onChange={set('address')} required />
             </div>
 
             <div className="mb-3">
               <label className="form-label" style={{ color: '#cbd5e1', fontSize: '13px' }}>Consum Maxim Orar (kWh) *</label>
               <input type="number" step="0.1" min="0.1" className="form-control form-control-dark" placeholder="ex: 18.5" value={form.maxHourlyEnergyConsumption} onChange={set('maxHourlyEnergyConsumption')} required />
-              <div className="form-text" style={{ color: '#64748b' }}>Valoare strict pozitivă reprezentând limita maximă admisă.</div>
+              <div className="form-text" style={{ color: '#64748b' }}>Valoare strict pozitiva reprezentand limita maxima admisa.</div>
             </div>
 
             <div className="mb-3">
@@ -92,16 +92,16 @@ export default function DeviceModal({ show, mode, initialData, users, onSubmit, 
                 ))}
               </select>
               <div className="form-text" style={{ color: '#64748b' }}>
-                Selectia alocă dispozitivul către un utilizator din tabela replică <code>user_account</code>.
+                Selectia aloca dispozitivul catre un utilizator din tabela replica <code>user_account</code>.
               </div>
             </div>
           </div>
 
           {/* Footer */}
           <div className="d-flex justify-content-end gap-2 px-4 py-3" style={{ background: '#0f172a', borderTop: '1px solid #334155' }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Anulează</button>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>Anuleaza</button>
             <button type="submit" className="btn btn-primary">
-              {mode === 'create' ? 'Creează Dispozitiv' : 'Salvează Modificările'}
+              {mode === 'create' ? 'Creeaza Dispozitiv' : 'Salveaza Modificarile'}
             </button>
           </div>
         </form>
