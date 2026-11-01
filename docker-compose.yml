@@ -97,8 +97,17 @@ services:
       - demo_net
     labels:
       - "traefik.enable=true"
+      # Router public pentru Swagger UI si OpenAPI docs (fara autentificare)
+      - "traefik.http.routers.user-service-swagger.rule=PathPrefix(`/user-service/swagger-ui`) || PathPrefix(`/user-service/v3/api-docs`)"
+      - "traefik.http.routers.user-service-swagger.entrypoints=web"
+      - "traefik.http.routers.user-service-swagger.priority=100"
+      - "traefik.http.routers.user-service-swagger.service=user-service"
+      # Router protejat pentru API (cu ForwardAuth JWT via auth-service)
       - "traefik.http.routers.user-service.rule=PathPrefix(`/user-service`)"
       - "traefik.http.routers.user-service.entrypoints=web"
+      - "traefik.http.routers.user-service.priority=50"
+      - "traefik.http.routers.user-service.middlewares=jwt-auth@docker"
+      - "traefik.http.routers.user-service.service=user-service"
       - "traefik.http.services.user-service.loadbalancer.server.port=8080"
 
   # =====================================================================
@@ -124,8 +133,17 @@ services:
       - demo_net
     labels:
       - "traefik.enable=true"
+      # Router public pentru Swagger UI si OpenAPI docs (fara autentificare)
+      - "traefik.http.routers.device-service-swagger.rule=PathPrefix(`/device-service/swagger-ui`) || PathPrefix(`/device-service/v3/api-docs`)"
+      - "traefik.http.routers.device-service-swagger.entrypoints=web"
+      - "traefik.http.routers.device-service-swagger.priority=100"
+      - "traefik.http.routers.device-service-swagger.service=device-service"
+      # Router protejat pentru API (cu ForwardAuth JWT via auth-service)
       - "traefik.http.routers.device-service.rule=PathPrefix(`/device-service`)"
       - "traefik.http.routers.device-service.entrypoints=web"
+      - "traefik.http.routers.device-service.priority=50"
+      - "traefik.http.routers.device-service.middlewares=jwt-auth@docker"
+      - "traefik.http.routers.device-service.service=device-service"
       - "traefik.http.services.device-service.loadbalancer.server.port=8081"
 
 
@@ -154,7 +172,12 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.auth-service.rule=PathPrefix(`/auth-service`)"
       - "traefik.http.routers.auth-service.entrypoints=web"
+      - "traefik.http.routers.auth-service.priority=50"
       - "traefik.http.services.auth-service.loadbalancer.server.port=8082"
+      # Middleware ForwardAuth pentru validarea token-urilor JWT la nivel de API Gateway
+      - "traefik.http.middlewares.jwt-auth.forwardauth.address=http://auth-service:8082/auth-service/auth/validate"
+      - "traefik.http.middlewares.jwt-auth.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.jwt-auth.forwardauth.authResponseHeaders=X-User-Id,X-User-Name,X-User-Role"
 
   # =====================================================================
   # 6. FRONTEND (ruteaza radacina catre Nginx)
@@ -174,6 +197,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.priority=1"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
 
 volumes:

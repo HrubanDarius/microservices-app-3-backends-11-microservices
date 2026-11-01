@@ -5,17 +5,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ro.tuc.ds2020.dtos.AuthResponseDTO;
@@ -30,7 +31,7 @@ import ro.tuc.ds2020.services.AuthService;
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/auth")
-@Tag(name = "Authentication", description = "Operatii de autentificare: Register, Login si validare JWT") //pt swagger
+@Tag(name = "Authentication", description = "Operatii de autentificare: Register, Login si validare JWT")
 @SuppressWarnings("checkstyle:DesignForExtension")
 public class AuthController {
 
@@ -90,7 +91,9 @@ public class AuthController {
 
     /**
      * Validates a JWT token provided in the Authorization header or as a query param.
+     * Supports all HTTP methods for reverse-proxy ForwardAuth compatibility.
      *
+     * @param request    incoming HTTP servlet request
      * @param authHeader optional Authorization header (Bearer &lt;token&gt;)
      * @param tokenParam optional token query parameter fallback
      * @return response with decoded user info if token is valid (HTTP 200 OK)
@@ -102,20 +105,43 @@ public class AuthController {
         @ApiResponse(responseCode = "200", description = "Token valid — date utilizator returnate"),
         @ApiResponse(responseCode = "401", description = "Token invalid sau expirat")
     })
-    @GetMapping(value = "/validate")
+    @RequestMapping(value = "/validate", method = {
+            RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+            RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS, RequestMethod.PATCH
+    })
     public ResponseEntity<AuthResponseDTO> validate(
+            final HttpServletRequest request,
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false)
             final String authHeader,
             @RequestParam(value = "token", required = false)
             final String tokenParam) {
+        if (request != null && "OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
         String token = null;
-        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-            token = authHeader.substring(BEARER_PREFIX.length()).trim();
+        if (authHeader != null) {
+            final String trimmed = authHeader.trim();
+            if (trimmed.regionMatches(true, 0, BEARER_PREFIX, 0, BEARER_PREFIX.length())) {
+                token = trimmed.substring(BEARER_PREFIX.length()).trim();
+            } else if (!trimmed.isEmpty()) {
+                token = trimmed;
+            }
         } else if (tokenParam != null && !tokenParam.isBlank()) {
             token = tokenParam.trim();
         }
 
         final AuthResponseDTO response = authService.validate(token);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        final HttpHeaders responseHeaders = new HttpHeaders();
+        if (response.getId() != null) {
+            responseHeaders.set("X-User-Id", response.getId().toString());
+        }
+        if (response.getUsername() != null) {
+            responseHeaders.set("X-User-Name", response.getUsername());
+        }
+        if (response.getRole() != null) {
+            responseHeaders.set("X-User-Role", response.getRole());
+        }
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
     }
 }
