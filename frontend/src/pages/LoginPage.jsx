@@ -72,23 +72,28 @@ export default function LoginPage({ onLoginSuccess }) {
 
     setLoading(true);
     try {
-      // 1. Creare profil in user-service (returneaza generatedUserId si sincronizeaza device-service)
-      const generatedUserId = await createUser({
-        name: regName.trim(),
-        address: regAddress.trim(),
-        age: ageNum,
-      });
-
-      // 2. Creare cont de autentificare in auth-service cu acelasi ID
+      // 1. Inregistrare cont in auth-service (ruta publica in gateway)
       await register({
-        id: generatedUserId,
         username: regUsername.trim(),
         password: regPassword,
         role: 'CLIENT',
       });
 
-      // 3. Autentificare automata dupa inregistrare
+      // 2. Autentificare imediata pentru obtinerea token-ului JWT si a ID-ului sincronizat
       const loggedUser = await login(regUsername.trim(), regPassword);
+
+      // 3. Creare profil in user-service folosind token-ul primit si ID-ul sincronizat
+      await createUser(
+        {
+          id: loggedUser.id,
+          name: regName.trim(),
+          address: regAddress.trim(),
+          age: ageNum,
+        },
+        loggedUser.token
+      );
+
+      // 4. Directionare catre aplicatie ca utilizator CLIENT conectat
       onLoginSuccess(loggedUser);
     } catch (err) {
       setError(err.message || 'Inregistrare esuata. Incercati din nou.');

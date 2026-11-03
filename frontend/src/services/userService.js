@@ -7,8 +7,15 @@ async function handleResponse(res) {
     if (res.status === 401) {
       throw new Error('Sesiune expirata sau neautorizata (HTTP 401). Te rugam sa te reconectezi.');
     }
-    const text = await res.text().catch(() => '');
-    throw new Error(text || `HTTP ${res.status}`);
+    let errorMsg = `HTTP ${res.status}`;
+    try {
+      const data = await res.json();
+      errorMsg = data.message || data.error || errorMsg;
+    } catch {
+      const text = await res.text().catch(() => '');
+      if (text) errorMsg = text;
+    }
+    throw new Error(errorMsg);
   }
   // 204 No Content → return null
   if (res.status === 204) return null;
@@ -29,10 +36,13 @@ export async function getUserById(id) {
   return handleResponse(res);
 }
 
-export async function createUser(data) {
+export async function createUser(data, customToken = null) {
+  const headers = customToken
+    ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${customToken}` }
+    : getAuthHeaders();
   const res = await fetch(BASE, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers,
     body: JSON.stringify(data),
   });
   return handleResponse(res);

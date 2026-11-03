@@ -15,7 +15,7 @@ services:
       - --entrypoints.web.address=:80
     ports:
       - "80:80"       # Punctul unic de intrare pentru toata aplicatia
-      - "8082:8080"   # Traefik Dashboard (am pus 8082 spre Windows ca sa nu fie confuzii)
+      - "8082:8080"   # Traefik Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - traefik_logs:/var/log/traefik
@@ -23,7 +23,7 @@ services:
       - demo_net
 
   # =====================================================================
-  # 2. BAZELE DE DATE (raman cu porturile expuse pt conexiunea din IntelliJ)
+  # 2. BAZELE DE DATE
   # =====================================================================
   user-db:
     image: mysql:8.4

@@ -7,8 +7,15 @@ async function handleResponse(res) {
     if (res.status === 401) {
       throw new Error('Sesiune expirata sau neautorizata (HTTP 401). Te rugam sa te reconectezi.');
     }
-    const text = await res.text().catch(() => '');
-    throw new Error(text || `HTTP ${res.status}`);
+    let errorMsg = `HTTP ${res.status}`;
+    try {
+      const data = await res.json();
+      errorMsg = data.message || data.error || errorMsg;
+    } catch {
+      const text = await res.text().catch(() => '');
+      if (text) errorMsg = text;
+    }
+    throw new Error(errorMsg);
   }
   if (res.status === 204) return null;
   return res.json();
